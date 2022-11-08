@@ -40,7 +40,7 @@ public class ItemRepositoryImpl implements ItemRepository {
     public List<Item> readAllByUserId(Long id) {
         List<Item> itemsById = new ArrayList<>();
         for (Item item : readAll()) {
-            if (item.getOwner().getId() == id) {
+            if (item.getOwner().getId().equals(id)) {
                 itemsById.add(item);
             }
         }
