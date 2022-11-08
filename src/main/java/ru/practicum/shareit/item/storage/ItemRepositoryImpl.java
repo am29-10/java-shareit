@@ -49,13 +49,13 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public Item update(Long id, Item item, User user) {
-        if(item.getName() != null) {
+        if (item.getName() != null) {
             items.get(id).setName(item.getName());
         }
-        if(item.getDescription() != null) {
+        if (item.getDescription() != null) {
             items.get(id).setDescription(item.getDescription());
         }
-        if(item.getAvailable() != null) {
+        if (item.getAvailable() != null) {
             items.get(id).setAvailable(item.getAvailable());
         }
         if (user != null) {
@@ -87,7 +87,6 @@ public class ItemRepositoryImpl implements ItemRepository {
         }
         return itemList;
     }
-
 
 
 }
