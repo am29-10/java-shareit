@@ -1,7 +1,7 @@
 package ru.practicum.shareit.item.controller;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
@@ -12,22 +12,14 @@ import ru.practicum.shareit.user.service.UserService;
 import javax.validation.Valid;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
 @Slf4j
+@AllArgsConstructor
 @RequestMapping("/items")
 public class ItemController {
 
     private final ItemService itemService;
     private final UserService userService;
-
-    @Autowired
-    public ItemController(ItemService itemService, UserService userService) {
-        this.itemService = itemService;
-        this.userService = userService;
-    }
 
     @GetMapping
     public List<Item> getAll(@RequestHeader("X-Sharer-User-id") long userId) {

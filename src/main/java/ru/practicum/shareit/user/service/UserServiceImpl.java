@@ -1,7 +1,7 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.EmailException;
 import ru.practicum.shareit.exceptions.EntityNotFoundException;
@@ -13,13 +13,9 @@ import java.util.List;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     @Override
     public User create(User user) {
