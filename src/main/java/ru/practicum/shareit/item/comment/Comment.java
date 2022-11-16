@@ -32,6 +32,7 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "author_id", referencedColumnName = "id")
     private User author;
+    @Column(name = "created")
     private LocalDateTime created;
 
 }
