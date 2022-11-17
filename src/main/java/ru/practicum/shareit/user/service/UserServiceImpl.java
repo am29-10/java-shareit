@@ -17,7 +17,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User create(User user) {
-        //checkEmail(user);
         User createUser = userRepository.save(user);
         log.info("Пользователь с id '{}' добавлен в список", createUser.getId());
         return createUser;
@@ -25,7 +24,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User update(Long id, User user) {
-        //checkEmail(user);
         if (userRepository.findById(id).isPresent()) {
             if (user.getName() != null) {
                 userRepository.findById(id).get().setName(user.getName());
