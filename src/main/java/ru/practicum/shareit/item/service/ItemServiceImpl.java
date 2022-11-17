@@ -36,7 +36,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item create(Item item, Long userId) {
-        validate(item, userId);
+        validate(item);
         item.setOwner(userRepository.findById(userId).get());
         Item createItem = itemRepository.save(item);
         log.info("Предмет с id = '{}' добавлен в список", createItem.getId());
@@ -58,7 +58,6 @@ public class ItemServiceImpl implements ItemService {
                 throw new EntityNotFoundException(String.format("EntityNotFoundException (У пользователя с id = %d " +
                         "отсутствуют личные предметы)", id));
             }
-            itemsWithBooking = new ArrayList<>();
             for (Item item : items) {
                 BookingItemDto lastBooking = null;
                 BookingItemDto nextBooking = null;
@@ -151,7 +150,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void delete(Long id, Long userId) {
-        validate(getItemById(id), userId);
+        validate(getItemById(id));
         if (itemRepository.findById(id).isPresent()) {
             itemRepository.deleteById(id);
         } else {
@@ -176,8 +175,7 @@ public class ItemServiceImpl implements ItemService {
                 comment.setItem(itemRepository.findById(itemId).get());
                 comment.setAuthor(userRepository.findById(userId).get());
                 comment.setCreated(LocalDateTime.now());
-                CommentDto commentDto = CommentMapper.toCommentDto(commentRepository.save(comment));
-                return commentDto;
+                return CommentMapper.toCommentDto(commentRepository.save(comment));
             } else {
                 throw new IllegalArgumentException(String.format("Пользователь с id=%d не имел, либо не завершил бронь " +
                         "с предметом с id=%d", userId, itemId));
@@ -188,7 +186,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
 
-    private void validate(Item item, Long userId) {
+    private void validate(Item item) {
         if (item.getName().isEmpty()) {
             log.info("ValidationException (Пустое название)");
             throw new ValidationException("Пустое название");
