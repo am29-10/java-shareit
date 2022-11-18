@@ -3,7 +3,6 @@ package ru.practicum.shareit.item.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.dto.BookingItemDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -22,6 +21,7 @@ import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -50,35 +50,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemBookingDto> readAllByUserId(Long id) {
-        List<ItemBookingDto> itemsWithBooking = new ArrayList<>();
-        List<CommentDto> commentsDto = new ArrayList<>();
-        if (userRepository.findById(id).isPresent()) {
-            List<Item> items = itemRepository.findAllByOwnerId(id);
-            if (items == null) {
-                throw new EntityNotFoundException(String.format("EntityNotFoundException (У пользователя с id = %d " +
-                        "отсутствуют личные предметы)", id));
-            }
-            for (Item item : items) {
-                BookingItemDto lastBooking = null;
-                BookingItemDto nextBooking = null;
-                Booking last = bookingRepository.findFirstByItem_Owner_IdAndAndItem_IdOrderByStart(id, item.getId());
-                Booking next = bookingRepository.findFirstByItem_OwnerIdAndIdOrderByStartDesc(id, item.getId());
-                if (last != null) {
-                    lastBooking = BookingMapper.toShortDto(last);
-                }
-                if (next != null) {
-                    nextBooking = BookingMapper.toShortDto(next);
-                }
-                itemsWithBooking.add(ItemMapper.toItemWishBookingAndCommentDto(item, lastBooking, nextBooking,
-                        commentsDto));
-            }
-        }
-        List<Comment> comments = commentRepository.findAllByItemId(id);
-        for (Comment comment : comments) {
-            CommentDto commentDto = CommentMapper.toCommentDto(comment);
-            commentsDto.add(commentDto);
-        }
-        return itemsWithBooking;
+        return itemRepository
+                .findAllByOwner(userRepository.findById(id).get())
+                .stream()
+                .map(this::addLastAndNextBooking)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -117,35 +93,22 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemBookingDto getItemByUserId(Long id, Long userId) {
-        Item item;
-        BookingItemDto lastBooking = null;
-        BookingItemDto nextBooking = null;
-        List<CommentDto> commentsDto = new ArrayList<>();
-        if (userRepository.findById(userId).isPresent()) {
-            if (itemRepository.findById(id).isPresent()) {
-                item = getItemById(id);
-                Booking last = bookingRepository.findFirstByItem_Owner_IdAndAndItem_IdOrderByStart(userId, id);
-                if (last != null) {
-                    lastBooking = BookingMapper.toShortDto(last);
-                }
-                Booking next = bookingRepository.findFirstByItem_OwnerIdAndIdOrderByStartDesc(userId, id);
-                if (next != null) {
-                    nextBooking = BookingMapper.toShortDto(next);
-                }
-                List<Comment> comments = commentRepository.findAllByItemId(id);
+        if (itemRepository.findById(id).isEmpty()) {
+            throw new EntityNotFoundException(String.format("Предмет с id = %d отсутствует в списке", id));
+        } else {
+            Item item = itemRepository.findById(id).get();
+            if (item.getOwner().equals(userRepository.findById(userId).get())) {
+                return addLastAndNextBooking(item);
+            } else {
+                List<Comment> comments = commentRepository.findAllByItem(itemRepository.findById(id).get());
+                List<CommentDto> commentsDto = new ArrayList<>();
                 for (Comment comment : comments) {
                     CommentDto commentDto = CommentMapper.toCommentDto(comment);
                     commentsDto.add(commentDto);
                 }
-            } else {
-                throw new EntityNotFoundException(String.format("EntityNotFoundException (Предмет с id = %d " +
-                        "отсутствует в списке)", id));
+                return ItemMapper.toItemWishBookingAndCommentDto(item, null, null, commentsDto);
             }
-        } else {
-            throw new EntityNotFoundException(String.format("EntityNotFoundException (Пользователь с id = %d " +
-                    "отсутствует в списке)", userId));
         }
-        return ItemMapper.toItemWishBookingAndCommentDto(item, lastBooking, nextBooking, commentsDto);
     }
 
     @Override
@@ -185,7 +148,6 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-
     private void validate(Item item) {
         if (item.getName().isEmpty()) {
             log.info("ValidationException (Пустое название)");
@@ -199,5 +161,26 @@ public class ItemServiceImpl implements ItemService {
             log.info("ValidationException (Ошибка статуса предмета с id = {})", item.getId());
             throw new IllegalArgumentException("Ошибка статуса предмет");
         }
+    }
+
+    private ItemBookingDto addLastAndNextBooking(Item item) {
+        ItemBookingDto itemBookingDto = ItemMapper.toItemWishBookingAndCommentDto(item, null,
+                null, null);
+        Booking lastBooking = bookingRepository.findByItemAndEndBeforeOrderByEndDesc(item, LocalDateTime.now());
+        if (lastBooking != null) {
+            itemBookingDto.setLastBooking(BookingMapper.toShortDto(lastBooking));
+        }
+        Booking nextBooking = bookingRepository.findByItemAndStartAfterOrderByStart(item, LocalDateTime.now());
+        if (nextBooking != null) {
+            itemBookingDto.setNextBooking(BookingMapper.toShortDto(nextBooking));
+        }
+        List<Comment> comments = commentRepository.findAllByItem(item);
+        List<CommentDto> commentsDto = new ArrayList<>();
+        for (Comment comment : comments) {
+            CommentDto commentDto = CommentMapper.toCommentDto(comment);
+            commentsDto.add(commentDto);
+        }
+        itemBookingDto.setComments(commentsDto);
+        return itemBookingDto;
     }
 }
