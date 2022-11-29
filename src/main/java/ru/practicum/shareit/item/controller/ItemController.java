@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.comment.CommentDto;
@@ -13,6 +14,8 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -24,19 +27,25 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping
-    public List<ItemBookingDto> getAll(@RequestHeader("X-Sharer-User-id") long userId) {
+    public List<ItemBookingDto> getAll(@RequestHeader("X-Sharer-User-id") long userId,
+                                       @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                       @Positive @RequestParam(defaultValue = "10") int size) {
         log.info("Получен запрос GET /items");
-        return itemService.readAllByUserId(userId);
+        if (from < 0 || size <= 0) {
+            log.info("Параметры поиска введены некоректно");
+            throw new IllegalArgumentException("Параметры поиска введены некоректно");
+        }
+        return itemService.readAllByUserId(userId, PageRequest.of(from / size, size));
     }
 
     @GetMapping("/{id}")
-    public ItemBookingDto get(@RequestHeader("X-Sharer-User-id") long userId, @Valid @PathVariable Long id) {
+    public ItemBookingDto getItem(@RequestHeader("X-Sharer-User-id") long userId, @Valid @PathVariable Long id) {
         log.info("Получен запрос GET /items/{}", id);
         return itemService.getItemByUserId(id, userId);
     }
 
     @PostMapping
-    public Item create(@RequestHeader("X-Sharer-User-id") long userId, @Valid @RequestBody ItemDto itemDto) {
+    public ItemDto create(@RequestHeader("X-Sharer-User-id") long userId, @Valid @RequestBody ItemDto itemDto) {
         log.info("Получен запрос POST /items");
         Item item = ItemMapper.toItem(itemDto);
         return itemService.create(item, userId);
@@ -57,9 +66,11 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<Item> searching(@RequestParam String text) {
+    public List<ItemDto> searching(@RequestParam String text,
+                                @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                @Positive @RequestParam(defaultValue = "10") int size) {
         log.info("Получен запрос GET /search");
-        return itemService.findItemsByText(text);
+        return itemService.findItemsByText(text, PageRequest.of(from / size, size));
     }
 
     @PostMapping("/{id}/comment")

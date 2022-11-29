@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
@@ -12,9 +13,11 @@ import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.comment.CommentMapper;
 import ru.practicum.shareit.item.comment.CommentRepository;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import javax.validation.ValidationException;
@@ -34,13 +37,22 @@ public class ItemServiceImpl implements ItemService {
 
     private final CommentRepository commentRepository;
 
+    private final ItemRequestRepository itemRequestRepository;
+
     @Override
-    public Item create(Item item, Long userId) {
+    public ItemDto create(Item item, Long userId) {
         validate(item);
         item.setOwner(userRepository.findById(userId).get());
+        if (item.getItemRequest() != null) {
+            item.setItemRequest(itemRequestRepository.findById(item.getItemRequest().getId()).get());
+        }
         Item createItem = itemRepository.save(item);
         log.info("Предмет с id = '{}' добавлен в список", createItem.getId());
-        return createItem;
+        ItemDto createItemDto = ItemMapper.toItemDto(createItem);
+        if (item.getItemRequest() != null) {
+            createItemDto.setRequestId(item.getItemRequest().getId());
+        }
+        return createItemDto;
     }
 
     @Override
@@ -49,9 +61,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemBookingDto> readAllByUserId(Long id) {
+    public List<ItemBookingDto> readAllByUserId(Long id, Pageable pageable) {
         return itemRepository
-                .findAllByOwner(userRepository.findById(id).get())
+                .findAllByOwner(userRepository.findById(id).get(), pageable)
                 .stream()
                 .map(this::addLastAndNextBooking)
                 .collect(Collectors.toList());
@@ -59,11 +71,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item update(Long id, Item item, Long userId) {
-        if (itemRepository.findById(id).get().getOwner() != userRepository.findById(userId).get()) {
-            throw new EntityNotFoundException("EntityNotFoundException (Предмет не может быть обновлен, т.к. он " +
-                    "не принадлежит данному пользователь)");
-        }
         if (itemRepository.findById(id).isPresent()) {
+            if (itemRepository.findById(id).get().getOwner() != userRepository.findById(userId).get()) {
+                throw new EntityNotFoundException("EntityNotFoundException (Предмет не может быть обновлен, т.к. он " +
+                        "не принадлежит данному пользователю)");
+            }
             if (item.getName() != null) {
                 itemRepository.findById(id).get().setName(item.getName());
             }
@@ -122,11 +134,14 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> findItemsByText(String text) {
+    public List<ItemDto> findItemsByText(String text, Pageable pageable) {
         if (text.isEmpty() && text.isBlank()) {
             return new ArrayList<>();
         } else {
-            return itemRepository.findByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text, text);
+            return itemRepository.findByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text, text, pageable)
+                    .stream()
+                    .map(ItemMapper::toItemDto)
+                    .collect(Collectors.toList());
         }
     }
 
