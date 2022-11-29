@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -35,4 +36,7 @@ public class User {
     @JsonIgnore
     @OneToMany(mappedBy = "owner")
     private List<Item> items = new ArrayList<>();
+    @JsonIgnore
+    @OneToMany(mappedBy = "requestor")
+    private List<ItemRequest> itemRequests = new ArrayList<>();
 }
