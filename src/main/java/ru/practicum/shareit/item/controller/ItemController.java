@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.comment.CommentDto;
@@ -31,11 +30,7 @@ public class ItemController {
                                        @PositiveOrZero @RequestParam(defaultValue = "0") int from,
                                        @Positive @RequestParam(defaultValue = "10") int size) {
         log.info("Получен запрос GET /items");
-        if (from < 0 || size <= 0) {
-            log.info("Параметры поиска введены некоректно");
-            throw new IllegalArgumentException("Параметры поиска введены некоректно");
-        }
-        return itemService.readAllByUserId(userId, PageRequest.of(from / size, size));
+        return itemService.readAllByUserId(userId, from, size);
     }
 
     @GetMapping("/{id}")
@@ -70,7 +65,7 @@ public class ItemController {
                                 @PositiveOrZero @RequestParam(defaultValue = "0") int from,
                                 @Positive @RequestParam(defaultValue = "10") int size) {
         log.info("Получен запрос GET /search");
-        return itemService.findItemsByText(text, PageRequest.of(from / size, size));
+        return itemService.findItemsByText(text, from, size);
     }
 
     @PostMapping("/{id}/comment")
