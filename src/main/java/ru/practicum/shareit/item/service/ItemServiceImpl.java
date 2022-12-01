@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.booking.dto.BookingItemDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -25,6 +27,7 @@ import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -71,11 +74,32 @@ public class ItemServiceImpl implements ItemService {
             throw new IllegalArgumentException("Параметры поиска введены некоректно");
         }
         Pageable pageable = PageRequest.of(from / size, size);
+
+        Map<Item, List<Comment>> comments =
+                commentRepository.findAll().stream().collect(Collectors.groupingBy(Comment::getItem));
+        Map<Item, List<Booking>> bookings = bookingRepository.findAllByStatusOrderByStartDesc(Status.APPROVED).stream()
+                .collect(Collectors.groupingBy(Booking::getItem));
+
         List<Item> items = itemRepository.findAllByOwner(userRepository.findById(id).get(), pageable).toList();
-        return items
-                .stream()
-                .map(this::addLastAndNextBooking)
-                .collect(Collectors.toList());
+
+        List<ItemBookingDto> itemsBookingDto = new ArrayList<>();
+
+        for (Item item : items) {
+            ItemBookingDto itemBookingDto = ItemMapper.toItemWishBookingAndCommentDto(item, null,
+                    null, List.of());
+            if (bookings.containsKey(item)) {
+                itemBookingDto = addLastAndNextBooking(item, bookings.get(item), List.of());
+            }
+            if (comments.containsKey(item)) {
+                List<CommentDto> commentsDto = comments.get(item)
+                        .stream()
+                        .map(CommentMapper::toCommentDto)
+                        .collect(Collectors.toList());
+                itemBookingDto.setComments(commentsDto);
+            }
+            itemsBookingDto.add(itemBookingDto);
+        }
+        return itemsBookingDto;
     }
 
     @Override
@@ -113,22 +137,23 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemBookingDto getItemByUserId(Long id, Long userId) {
-        if (itemRepository.findById(id).isEmpty()) {
-            throw new EntityNotFoundException(String.format("Предмет с id = %d отсутствует в списке", id));
+    public ItemBookingDto getItemByUserId(Long itemId, Long userId) {
+        if (itemRepository.findById(itemId).isEmpty()) {
+            throw new EntityNotFoundException(String.format("Предмет с id = %d отсутствует в списке", itemId));
         } else {
-            Item item = itemRepository.findById(id).get();
-            List<CommentDto> commentsDto;
+            Item item = itemRepository.findById(itemId).get();
+            List<Comment> comments = commentRepository.findAllByItem(itemRepository.findById(itemId).get());
             if (item.getOwner().equals(userRepository.findById(userId).get())) {
-                return addLastAndNextBooking(item);
+                List<Booking> bookings =
+                        bookingRepository.findAllByItem_IdOrderByStartDesc(itemId);
+                if (bookings.size() != 0) {
+                    return addLastAndNextBooking(item, bookings, comments);
+                } else {
+                    return addLastAndNextBooking(item, List.of(), comments);
+                }
             } else {
-                List<Comment> comments = commentRepository.findAllByItem(itemRepository.findById(id).get());
-                commentsDto = comments
-                        .stream()
-                        .map(CommentMapper::toCommentDto)
-                        .collect(Collectors.toList());
+                return addLastAndNextBooking(item, List.of(), comments);
             }
-            return ItemMapper.toItemWishBookingAndCommentDto(item, null, null, commentsDto);
         }
     }
 
@@ -194,18 +219,23 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    private ItemBookingDto addLastAndNextBooking(Item item) {
-        ItemBookingDto itemBookingDto = ItemMapper.toItemWishBookingAndCommentDto(item, null,
-                null, null);
-        Booking lastBooking = bookingRepository.findByItemAndEndBeforeOrderByEndDesc(item, LocalDateTime.now());
-        if (lastBooking != null) {
-            itemBookingDto.setLastBooking(BookingMapper.toShortDto(lastBooking));
+    private ItemBookingDto addLastAndNextBooking(Item item, List<Booking> bookings, List<Comment> comments) {
+        ItemBookingDto itemBookingDto = ItemMapper.toItemWishBookingAndCommentDto(item, null, null,
+                null);
+        List<BookingItemDto> lastBookings = bookings.stream()
+                .filter(booking -> booking.getEnd().isBefore(LocalDateTime.now()))
+                .map(BookingMapper::toShortDto)
+                .collect(Collectors.toList());
+        if (lastBookings.size() != 0) {
+            itemBookingDto.setLastBooking(lastBookings.get(0));
         }
-        Booking nextBooking = bookingRepository.findByItemAndStartAfterOrderByStart(item, LocalDateTime.now());
-        if (nextBooking != null) {
-            itemBookingDto.setNextBooking(BookingMapper.toShortDto(nextBooking));
+        List<BookingItemDto> nextBookings = bookings.stream()
+                .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
+                .map(BookingMapper::toShortDto)
+                .collect(Collectors.toList());
+        if (nextBookings.size() != 0) {
+            itemBookingDto.setNextBooking(nextBookings.get(nextBookings.size() - 1));
         }
-        List<Comment> comments = commentRepository.findAllByItem(item);
         List<CommentDto> commentsDto = comments
                 .stream()
                 .map(CommentMapper::toCommentDto)
