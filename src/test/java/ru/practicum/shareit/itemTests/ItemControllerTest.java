@@ -89,11 +89,9 @@ class ItemControllerTest {
 
     @Test
     void getAllFail() throws Exception {
-        ItemBookingDto itemBookingDto = ItemMapper.toItemWishBookingAndCommentDto(item, null, null,
-                List.of(CommentMapper.toCommentDto(comment)));
         Mockito
                 .when(itemService.readAllByUserId(anyLong(), any(), any()))
-                .thenReturn(List.of(itemBookingDto));
+                        .thenThrow(new IllegalArgumentException());
 
         mvc.perform(get("/items?from=-1")
                         .characterEncoding(StandardCharsets.UTF_8)

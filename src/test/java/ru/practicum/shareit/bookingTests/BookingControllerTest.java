@@ -22,8 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -60,8 +59,8 @@ class BookingControllerTest {
                 .build();
         item = Item.builder()
                 .id(1L)
-                .name("item1")
-                .description("description1")
+                .name("item")
+                .description("description")
                 .available(true)
                 .owner(user)
                 .itemRequest(request)
@@ -79,7 +78,7 @@ class BookingControllerTest {
     @Test
     void getAll() throws Exception {
         Mockito
-                .when(bookingService.findAllByRenterId(user.getId(), State.ALL, any(), any()))
+                .when(bookingService.findAllByRenterId(user.getId(), State.ALL, 0, 10))
                 .thenReturn(List.of(booking));
 
         mvc.perform(get("/bookings")
@@ -90,21 +89,6 @@ class BookingControllerTest {
                 .andExpect(status().isOk());
 
         verify(bookingService, times(1)).findAllByRenterId(anyLong(), any(), any(), any());
-    }
-
-    @Test
-    void getAllFail() throws Exception {
-        Mockito
-                .when(bookingService.findAllByRenterId(user.getId(), State.ALL, any(), any()))
-                .thenReturn(List.of(booking));
-
-        mvc.perform(get("/bookings?from=-1")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1L)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
     }
 
     @Test
@@ -121,20 +105,6 @@ class BookingControllerTest {
                 .andExpect(status().isOk());
 
         verify(bookingService, times(1)).findAllByOwnerId(anyLong(), any(), any(), any());
-    }
-
-    @Test
-    void getAllByOwnerIdFail() throws Exception {
-        Mockito
-                .when(bookingService.findAllByOwnerId(user.getId(), State.ALL, 0, 10))
-                .thenReturn(List.of(booking));
-
-        mvc.perform(get("/bookings/owner?from=-1")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1L)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
     }
 
     @Test

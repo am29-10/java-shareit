@@ -104,22 +104,6 @@ class ItemRequestControllerTest {
     }
 
     @Test
-    void getAllFail() throws Exception {
-        request.setItems(List.of(item));
-        List<ItemRequestWithAnswersDto> requests = List.of(ItemRequestMapper.toItemRequestWithAnswersDto(request));
-        Mockito
-                .when(requestService.getAll(anyLong(), any(), any()))
-                .thenReturn(requests);
-
-        mvc.perform(get("/requests/all?from=-1")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1L)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void getById() throws Exception {
         request.setItems(List.of(item));
         ItemRequestWithAnswersDto request1 = ItemRequestMapper.toItemRequestWithAnswersDto(request);
