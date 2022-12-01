@@ -263,6 +263,19 @@ class BookingServiceTest {
     }
 
     @Test
+    void setStatusWithUnsupportedStatus() {
+        booking.setStatus(Status.UNSUPPORTED_STATUS);
+        Mockito
+                .when(bookingRepository.findById(anyLong()))
+                .thenReturn(Optional.of(booking));
+
+        assertThrows(IllegalArgumentException.class, () -> bookingService.setStatus(booking.getId(), user.getId(),
+                true));
+
+        verify(bookingRepository, times(3)).findById(any());
+    }
+
+    @Test
     void get() {
         Mockito
                 .when(bookingRepository.findById(anyLong()))
@@ -343,7 +356,6 @@ class BookingServiceTest {
                 .findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(anyLong(), any(), any(), any());
         verify(bookingRepository, times(1)).findAllByBookerIdAndStatusOrderByStartDesc(anyLong(),
                 any(), any());
-
     }
 
     @Test
@@ -375,6 +387,12 @@ class BookingServiceTest {
                 0, 10));
 
         verify(userRepository, times(1)).findById(any());
+    }
+
+    @Test
+    void findAllByRenterIdFailNegativeFrom() {
+        assertThrows(IllegalArgumentException.class, () -> bookingService.findAllByRenterId(user.getId(), State.WAITING,
+                -1, 10));
     }
 
     @Test
@@ -456,6 +474,13 @@ class BookingServiceTest {
                 0, 10));
 
         verify(userRepository, times(1)).findById(any());
+    }
+
+    @Test
+    void findAllByOwnerIdFailWithNegativeFrom() {
+        assertThrows(IllegalArgumentException.class, () -> bookingService.findAllByOwnerId(user.getId(), State.WAITING,
+                -1, 10));
+
     }
 
     @Test

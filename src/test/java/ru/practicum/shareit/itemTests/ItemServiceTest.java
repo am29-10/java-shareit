@@ -58,7 +58,6 @@ class ItemServiceTest {
     @MockBean
     BookingRepository bookingRepository;
 
-
     User user;
     User user2;
     Item item;
@@ -150,6 +149,11 @@ class ItemServiceTest {
     }
 
     @Test
+    void readAllFail() {
+        assertThrows(IllegalArgumentException.class, () -> itemService.readAll(-1, 10));
+    }
+
+    @Test
     void readAllByUserId() {
         List<Item> items = List.of(item);
         Mockito
@@ -164,6 +168,11 @@ class ItemServiceTest {
 
         verify(itemRepository, times(1)).findAllByOwner(any(), any());
         verify(userRepository, times(1)).findById(anyLong());
+    }
+
+    @Test
+    void readAllByUserIdFail() {
+        assertThrows(IllegalArgumentException.class, () -> itemService.readAllByUserId(1L, -1, 10));
     }
 
     @Test
@@ -244,7 +253,7 @@ class ItemServiceTest {
 
         assertEquals(item.getName(), "item");
 
-        verify(itemRepository, times(2)).findById(anyLong());
+        verify(itemRepository, times(3)).findById(anyLong());
         verify(userRepository, times(1)).findById(anyLong());
         verify(commentRepository, times(1)).findAllByItem(any());
     }
@@ -310,6 +319,11 @@ class ItemServiceTest {
 
         verify(itemRepository, times(1))
                 .findByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(any(), any(), any());
+    }
+
+    @Test
+    void findItemsByTextFail() {
+        assertThrows(IllegalArgumentException.class, () -> itemService.findItemsByText("Text", -1, 10));
     }
 
     @Test
