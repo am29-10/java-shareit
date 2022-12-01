@@ -66,6 +66,9 @@ public class BookingServiceImpl implements BookingService {
                         } else {
                             bookingRepository.findById(id).get().setStatus(Status.REJECTED);
                         }
+                        return bookingRepository.save(bookingRepository.findById(id).get());
+                    default:
+                        throw new IllegalArgumentException("Unknown status: " + status);
                 }
             } else {
                 throw new EntityNotFoundException(String.format("Невозможно подтвердить или отклонить бронь, т.к. " +
@@ -74,7 +77,6 @@ public class BookingServiceImpl implements BookingService {
         } else {
             throw new EntityNotFoundException(String.format("Бронь с id=%d отсутствует в списке", id));
         }
-        return bookingRepository.save(bookingRepository.findById(id).get());
     }
 
     @Override
