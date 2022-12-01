@@ -49,7 +49,7 @@ class UserControllerTest {
     @Test
     void getAll() throws Exception {
         Mockito
-                .when(userService.getAll())
+                .when(userService.getAll(any(), any()))
                 .thenReturn(List.of(user));
 
         mvc.perform(get("/users")
@@ -59,7 +59,7 @@ class UserControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        verify(userService, times(1)).getAll();
+        verify(userService, times(1)).getAll(any(), any());
     }
 
     @Test

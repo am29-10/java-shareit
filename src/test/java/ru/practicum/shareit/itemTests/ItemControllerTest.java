@@ -76,7 +76,7 @@ class ItemControllerTest {
         ItemBookingDto itemBookingDto = ItemMapper.toItemWishBookingAndCommentDto(item, null, null,
                 List.of(CommentMapper.toCommentDto(comment)));
         Mockito
-                .when(itemService.readAllByUserId(anyLong(), any()))
+                .when(itemService.readAllByUserId(anyLong(), any(), any()))
                 .thenReturn(List.of(itemBookingDto));
 
         mvc.perform(get("/items")
@@ -92,7 +92,7 @@ class ItemControllerTest {
         ItemBookingDto itemBookingDto = ItemMapper.toItemWishBookingAndCommentDto(item, null, null,
                 List.of(CommentMapper.toCommentDto(comment)));
         Mockito
-                .when(itemService.readAllByUserId(anyLong(), any()))
+                .when(itemService.readAllByUserId(anyLong(), any(), any()))
                 .thenReturn(List.of(itemBookingDto));
 
         mvc.perform(get("/items?from=-1")
@@ -170,7 +170,7 @@ class ItemControllerTest {
         ItemDto itemDto = ItemMapper.toItemDto(itemUpdate);
         List<ItemDto> items = List.of(itemDto);
         Mockito
-                .when(itemService.findItemsByText(any(), any()))
+                .when(itemService.findItemsByText(any(), any(), any()))
                 .thenReturn(items);
 
         mvc.perform(get("/items/search?text='item'")

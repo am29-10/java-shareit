@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.booking.State;
 import ru.practicum.shareit.booking.Status;
@@ -318,13 +317,13 @@ class BookingServiceTest {
         Mockito
                 .when(bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(anyLong(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
-        List<Booking> bookingsAll = bookingService.findAllByRenterId(user.getId(), State.ALL, Pageable.unpaged());
-        List<Booking> bookingsFuture = bookingService.findAllByRenterId(user.getId(), State.FUTURE, Pageable.unpaged());
-        List<Booking> bookingsPast = bookingService.findAllByRenterId(user.getId(), State.PAST, Pageable.unpaged());
+        List<Booking> bookingsAll = bookingService.findAllByRenterId(user.getId(), State.ALL, 0, 10);
+        List<Booking> bookingsFuture = bookingService.findAllByRenterId(user.getId(), State.FUTURE, 0, 10);
+        List<Booking> bookingsPast = bookingService.findAllByRenterId(user.getId(), State.PAST, 0, 10);
         List<Booking> bookingsCurrent = bookingService.findAllByRenterId(user.getId(), State.CURRENT,
-                Pageable.unpaged());
+                0, 10);
         List<Booking> bookingsWaiting = bookingService.findAllByRenterId(user.getId(), State.WAITING,
-                Pageable.unpaged());
+                0, 10);
 
         assertEquals(bookingsAll.size(), 1);
         assertEquals(bookingsFuture.size(), 1);
@@ -332,7 +331,7 @@ class BookingServiceTest {
         assertEquals(bookingsCurrent.size(), 0);
         assertEquals(bookingsWaiting.size(), 1);
         assertThrows(IllegalArgumentException.class, () -> bookingService.findAllByRenterId(user.getId(),
-                State.UNSUPPORTED_STATUS, Pageable.unpaged()));
+                State.UNSUPPORTED_STATUS, 0, 10));
 
         verify(userRepository, times(6)).findById(any());
         verify(bookingRepository, times(1)).findAllByBookerIdOrderByStartDesc(anyLong(), any());
@@ -356,7 +355,7 @@ class BookingServiceTest {
                 .when(bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(anyLong(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of()));
         List<Booking> bookingsRejected = bookingService.findAllByRenterId(user.getId(), State.REJECTED,
-                Pageable.unpaged());
+                0, 10);
 
         assertEquals(bookingsRejected.size(), 0);
 
@@ -373,7 +372,7 @@ class BookingServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> bookingService.findAllByRenterId(user.getId(), State.WAITING,
-                Pageable.unpaged()));
+                0, 10));
 
         verify(userRepository, times(1)).findById(any());
     }
@@ -400,13 +399,13 @@ class BookingServiceTest {
                 .when(bookingRepository.findAllByItem_OwnerIdAndStatusOrderByStartDesc(anyLong(), any(),
                         any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
-        List<Booking> bookingsAll = bookingService.findAllByOwnerId(user.getId(), State.ALL, Pageable.unpaged());
-        List<Booking> bookingsFuture = bookingService.findAllByOwnerId(user.getId(), State.FUTURE, Pageable.unpaged());
-        List<Booking> bookingsPast = bookingService.findAllByOwnerId(user.getId(), State.PAST, Pageable.unpaged());
+        List<Booking> bookingsAll = bookingService.findAllByOwnerId(user.getId(), State.ALL, 0, 10);
+        List<Booking> bookingsFuture = bookingService.findAllByOwnerId(user.getId(), State.FUTURE, 0, 10);
+        List<Booking> bookingsPast = bookingService.findAllByOwnerId(user.getId(), State.PAST, 0, 10);
         List<Booking> bookingsCurrent = bookingService.findAllByOwnerId(user.getId(), State.CURRENT,
-                Pageable.unpaged());
+                0, 10);
         List<Booking> bookingsWaiting = bookingService.findAllByOwnerId(user.getId(), State.WAITING,
-                Pageable.unpaged());
+                0, 10);
 
         assertEquals(bookingsAll.size(), 1);
         assertEquals(bookingsFuture.size(), 1);
@@ -414,7 +413,7 @@ class BookingServiceTest {
         assertEquals(bookingsCurrent.size(), 0);
         assertEquals(bookingsWaiting.size(), 1);
         assertThrows(IllegalArgumentException.class, () -> bookingService.findAllByOwnerId(user.getId(),
-                State.UNSUPPORTED_STATUS, Pageable.unpaged()));
+                State.UNSUPPORTED_STATUS, 0, 10));
 
         verify(userRepository, times(6)).findById(any());
         verify(bookingRepository, times(1)).findAllByItem_OwnerIdOrderByStartDesc(anyLong(), any());
@@ -438,7 +437,7 @@ class BookingServiceTest {
                         any()))
                 .thenReturn(new PageImpl<>(List.of()));
         List<Booking> bookingsRejected = bookingService.findAllByOwnerId(user.getId(), State.REJECTED,
-                Pageable.unpaged());
+                0, 10);
 
         assertEquals(bookingsRejected.size(), 0);
 
@@ -454,7 +453,7 @@ class BookingServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> bookingService.findAllByOwnerId(user.getId(), State.WAITING,
-                Pageable.unpaged()));
+                0, 10));
 
         verify(userRepository, times(1)).findById(any());
     }

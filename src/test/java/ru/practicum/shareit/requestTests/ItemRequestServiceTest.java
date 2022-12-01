@@ -6,6 +6,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.booking.Status;
@@ -131,15 +132,16 @@ class ItemRequestServiceTest {
                 .when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
         Mockito
-                .when(requestRepository.findAllByRequestor_IdOrderByCreatedDesc(anyLong()))
-                .thenReturn(List.of(request));
+                .when(requestRepository.findAllByRequestor_IdOrderByCreatedDesc(anyLong(), any()))
+                .thenReturn(new PageImpl<>(List.of(request)));
         request.setItems(List.of(item));
-        List<ItemRequestWithAnswersDto> requests = requestService.getAllByRequestorId(user.getId());
+        List<ItemRequestWithAnswersDto> requests = requestService.getAllByRequestorId(user.getId(), 0, 10);
 
         assertEquals(requests.size(), 1);
 
         verify(userRepository, times(1)).findById(anyLong());
-        verify(requestRepository, times(1)).findAllByRequestor_IdOrderByCreatedDesc(anyLong());
+        verify(requestRepository, times(1)).findAllByRequestor_IdOrderByCreatedDesc(anyLong(),
+                any());
     }
 
     @Test
@@ -148,7 +150,7 @@ class ItemRequestServiceTest {
                 .when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> requestService.getAllByRequestorId(user.getId()));
+        assertThrows(EntityNotFoundException.class, () -> requestService.getAllByRequestorId(user.getId(), 0, 10));
 
         verify(userRepository, times(1)).findById(anyLong());
     }
@@ -199,14 +201,14 @@ class ItemRequestServiceTest {
     @Test
     void getAll() {
         Mockito
-                .when(requestRepository.findAll())
-                .thenReturn(List.of(request));
+                .when(requestRepository.findAll((Pageable) any()))
+                .thenReturn(new PageImpl<>(List.of(request)));
         request.setItems(List.of(item));
-        List<ItemRequestWithAnswersDto> requests = requestService.getAll(user2.getId(), Pageable.unpaged());
+        List<ItemRequestWithAnswersDto> requests = requestService.getAll(user2.getId(), 0, 10);
 
         assertEquals(requests.size(), 1);
 
-        verify(requestRepository, times(1)).findAll();
+        verify(requestRepository, times(1)).findAll((Pageable) any());
     }
 
     @Test

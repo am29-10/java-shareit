@@ -140,13 +140,13 @@ class ItemServiceTest {
     void readAll() {
         List<Item> items = List.of(item);
         Mockito
-                .when(itemRepository.findAll())
-                .thenReturn(items);
-        List<Item> items2 = itemService.readAll();
+                .when(itemRepository.findAll((Pageable) any()))
+                .thenReturn(new PageImpl<>(items));
+        List<Item> items2 = itemService.readAll(0, 10);
 
         assertEquals(items2.size(), 1);
 
-        verify(itemRepository, times(1)).findAll();
+        verify(itemRepository, times(1)).findAll((Pageable) any());
     }
 
     @Test
@@ -158,7 +158,7 @@ class ItemServiceTest {
         Mockito
                 .when(itemRepository.findAllByOwner(any(), any()))
                 .thenReturn(new PageImpl<>(items));
-        List<ItemBookingDto> items2 = itemService.readAllByUserId(1L, Pageable.unpaged());
+        List<ItemBookingDto> items2 = itemService.readAllByUserId(1L, 1, 10);
 
         assertEquals(items2.size(), 1);
 
@@ -304,7 +304,7 @@ class ItemServiceTest {
                 .when(itemRepository.findByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(any(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of(item)));
         String text = "item";
-        List<ItemDto> items = itemService.findItemsByText(text, Pageable.unpaged());
+        List<ItemDto> items = itemService.findItemsByText(text, 1, 10);
 
         assertEquals(items.size(), 1);
 
@@ -315,7 +315,7 @@ class ItemServiceTest {
     @Test
     void findItemsByTextIsEmpty() {
         String text = "";
-        List<ItemDto> items = itemService.findItemsByText(text, Pageable.unpaged());
+        List<ItemDto> items = itemService.findItemsByText(text, 1, 10);
 
         assertEquals(items.size(), 0);
 

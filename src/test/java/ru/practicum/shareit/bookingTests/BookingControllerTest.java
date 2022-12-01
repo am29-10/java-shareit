@@ -7,7 +7,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.State;
@@ -80,7 +79,7 @@ class BookingControllerTest {
     @Test
     void getAll() throws Exception {
         Mockito
-                .when(bookingService.findAllByRenterId(user.getId(), State.ALL, Pageable.unpaged()))
+                .when(bookingService.findAllByRenterId(user.getId(), State.ALL, any(), any()))
                 .thenReturn(List.of(booking));
 
         mvc.perform(get("/bookings")
@@ -90,13 +89,13 @@ class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        verify(bookingService, times(1)).findAllByRenterId(anyLong(), any(), any());
+        verify(bookingService, times(1)).findAllByRenterId(anyLong(), any(), any(), any());
     }
 
     @Test
     void getAllFail() throws Exception {
         Mockito
-                .when(bookingService.findAllByRenterId(user.getId(), State.ALL, Pageable.unpaged()))
+                .when(bookingService.findAllByRenterId(user.getId(), State.ALL, any(), any()))
                 .thenReturn(List.of(booking));
 
         mvc.perform(get("/bookings?from=-1")
@@ -111,7 +110,7 @@ class BookingControllerTest {
     @Test
     void getAllByOwnerId() throws Exception {
         Mockito
-                .when(bookingService.findAllByOwnerId(user.getId(), State.ALL, Pageable.unpaged()))
+                .when(bookingService.findAllByOwnerId(user.getId(), State.ALL, 0, 10))
                 .thenReturn(List.of(booking));
 
         mvc.perform(get("/bookings/owner")
@@ -121,13 +120,13 @@ class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        verify(bookingService, times(1)).findAllByOwnerId(anyLong(), any(), any());
+        verify(bookingService, times(1)).findAllByOwnerId(anyLong(), any(), any(), any());
     }
 
     @Test
     void getAllByOwnerIdFail() throws Exception {
         Mockito
-                .when(bookingService.findAllByOwnerId(user.getId(), State.ALL, Pageable.unpaged()))
+                .when(bookingService.findAllByOwnerId(user.getId(), State.ALL, 0, 10))
                 .thenReturn(List.of(booking));
 
         mvc.perform(get("/bookings/owner?from=-1")

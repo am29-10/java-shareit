@@ -6,6 +6,8 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.exceptions.EntityNotFoundException;
 import ru.practicum.shareit.user.model.User;
@@ -113,12 +115,12 @@ class UserServiceTest {
     @Test
     void getAll() {
         Mockito
-                .when(userRepository.findAll())
-                .thenReturn(List.of(user));
-        List<User> users = userService.getAll();
+                .when(userRepository.findAll((Pageable) any()))
+                .thenReturn(new PageImpl<>(List.of(user)));
+        List<User> users = userService.getAll(0, 10);
 
         assertEquals(users.size(), 1);
 
-        verify(userRepository, times(1)).findAll();
+        verify(userRepository, times(1)).findAll((Pageable) any());
     }
 }

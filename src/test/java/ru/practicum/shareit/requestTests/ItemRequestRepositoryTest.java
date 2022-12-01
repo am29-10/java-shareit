@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -60,7 +61,8 @@ class ItemRequestRepositoryTest {
 
     @Test
     void findAllByRequestor_IdOrderByCreatedDesc() {
-        List<ItemRequest> requests = requestRepository.findAllByRequestor_IdOrderByCreatedDesc(user.getId());
+        List<ItemRequest> requests = requestRepository.findAllByRequestor_IdOrderByCreatedDesc(user.getId(),
+                Pageable.unpaged()).toList();
 
         assertEquals(requests.size(), 1);
     }
