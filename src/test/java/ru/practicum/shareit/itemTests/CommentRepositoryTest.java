@@ -29,42 +29,42 @@ class CommentRepositoryTest {
     @Autowired
     UserRepository userRepository;
 
-    Item item1;
+    Item item;
 
-    User user1;
+    User user;
 
-    Comment comment1;
+    Comment comment;
 
     @BeforeEach
     void beforeEach() {
-        user1 = userRepository.save(User.builder()
+        user = userRepository.save(User.builder()
                 .id(1L)
                 .name("user1")
                 .email("user1@mail.ru")
                 .build());
-        item1 = itemRepository.save(Item.builder()
+        item = itemRepository.save(Item.builder()
                 .id(1L)
                 .name("item1")
                 .description("description1")
                 .available(true)
-                .owner(user1)
+                .owner(user)
                 .itemRequest(null)
                 .build());
-        comment1 = commentRepository.save(Comment.builder()
+        comment = commentRepository.save(Comment.builder()
                 .id(1L)
-                .author(user1)
+                .author(user)
                 .text("text")
-                .item(item1)
+                .item(item)
                 .created(LocalDateTime.now())
                 .build());
     }
 
     @Test
     void findAllByItem() {
-        List<Comment> comments = commentRepository.findAllByItem(item1);
+        List<Comment> comments = commentRepository.findAllByItem(item);
         assertNotNull(comments);
         assertEquals(1, comments.size());
-        assertEquals(comments.get(0), comment1);
+        assertEquals(comments.get(0), comment);
 
     }
 }

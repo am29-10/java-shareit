@@ -38,8 +38,8 @@ class BookingRepositoryTest {
     Item item;
     ItemRequest request;
     Booking booking;
-    LocalDateTime time1;
-    LocalDateTime time2;
+    LocalDateTime start;
+    LocalDateTime end;
 
     @BeforeEach
     void beforeEach() {
@@ -70,8 +70,8 @@ class BookingRepositoryTest {
                 .start(LocalDateTime.of(2022, 1, 1, 1, 1, 1))
                 .end(LocalDateTime.of(2022, 2, 1, 1, 1, 1))
                 .build());
-        time1 = LocalDateTime.of(2021, 1, 1, 1, 1, 1);
-        time2 = LocalDateTime.of(2023, 1, 1, 1, 1, 1);
+        start = LocalDateTime.of(2021, 1, 1, 1, 1, 1);
+        end = LocalDateTime.of(2023, 1, 1, 1, 1, 1);
     }
 
     @Test
@@ -84,7 +84,7 @@ class BookingRepositoryTest {
     @Test
     void findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc() {
         List<Booking> bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(1L,
-                time2, time1, Pageable.unpaged()).toList();
+                end, start, Pageable.unpaged()).toList();
 
         assertEquals(bookings.size(), 1);
     }
@@ -92,7 +92,7 @@ class BookingRepositoryTest {
     @Test
     void findAllByBookerIdAndEndBeforeOrderByStartDesc() {
         List<Booking> bookings = bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(1L,
-                time2, Pageable.unpaged()).toList();
+                end, Pageable.unpaged()).toList();
 
         assertEquals(bookings.size(), 1);
     }
@@ -100,7 +100,7 @@ class BookingRepositoryTest {
     @Test
     void findAllByBookerIdAndStartAfterOrderByStartDesc() {
         List<Booking> bookings = bookingRepository.findAllByBookerIdAndStartAfterOrderByStartDesc(1L,
-                time1, Pageable.unpaged()).toList();
+                start, Pageable.unpaged()).toList();
 
         assertEquals(bookings.size(), 1);
     }
@@ -127,7 +127,7 @@ class BookingRepositoryTest {
     @Test
     void findAllByItem_OwnerIdAndStartBeforeAndEndAfterOrderByStartDesc() {
         List<Booking> bookings = bookingRepository.findAllByItem_OwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(1L,
-                time2, time1, Pageable.unpaged()).toList();
+                end, start, Pageable.unpaged()).toList();
 
         assertEquals(bookings.size(), 1);
     }
@@ -135,7 +135,7 @@ class BookingRepositoryTest {
     @Test
     void findAllByItem_OwnerIdAndEndBeforeOrderByStartDesc() {
         List<Booking> bookings = bookingRepository.findAllByItem_OwnerIdAndEndBeforeOrderByStartDesc(1L,
-                time2, Pageable.unpaged()).toList();
+                end, Pageable.unpaged()).toList();
 
         assertEquals(bookings.size(), 1);
     }
@@ -143,7 +143,7 @@ class BookingRepositoryTest {
     @Test
     void findAllByItem_OwnerIdAndStartAfterOrderByStartDesc() {
         List<Booking> bookings = bookingRepository.findAllByItem_OwnerIdAndStartAfterOrderByStartDesc(1L,
-                time1, Pageable.unpaged()).toList();
+                start, Pageable.unpaged()).toList();
 
         assertEquals(bookings.size(), 1);
     }
@@ -162,21 +162,21 @@ class BookingRepositoryTest {
     @Test
     void findAllByItemIdAndAndBooker_IdAndEndBefore() {
         List<Booking> bookings = bookingRepository.findAllByItemIdAndAndBooker_IdAndEndBefore(1L,
-                1L, time2);
+                1L, end);
 
         assertEquals(bookings.size(), 1);
     }
 
     @Test
     void findByItemAndEndBeforeOrderByEndDesc() {
-        Booking booking1 = bookingRepository.findByItemAndEndBeforeOrderByEndDesc(item, time2);
+        Booking booking1 = bookingRepository.findByItemAndEndBeforeOrderByEndDesc(item, end);
 
         assertEquals(booking1.getItem(), item);
     }
 
     @Test
     void findByItemAndStartAfterOrderByStart() {
-        Booking booking1 = bookingRepository.findByItemAndStartAfterOrderByStart(item, time1);
+        Booking booking1 = bookingRepository.findByItemAndStartAfterOrderByStart(item, start);
 
         assertEquals(booking1.getItem(), item);
     }
