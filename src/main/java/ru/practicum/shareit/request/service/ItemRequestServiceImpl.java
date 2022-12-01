@@ -47,7 +47,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             throw new IllegalArgumentException("Параметры поиска введены некоректно");
         }
         Pageable pageable = PageRequest.of(from / size, size);
-        return itemRequestRepository.findAllByRequestor_IdOrderByCreatedDesc(userId, pageable)
+        List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequestor_IdOrderByCreatedDesc(userId,
+                pageable).toList();
+        return itemRequests
                 .stream()
                 .map(ItemRequestMapper::toItemRequestWithAnswersDto)
                 .collect(Collectors.toList());
@@ -60,7 +62,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             throw new IllegalArgumentException("Параметры поиска введены некоректно");
         }
         Pageable pageable = PageRequest.of(from / size, size);
-        return itemRequestRepository.findAll(pageable).stream()
+        List<ItemRequest> itemRequests = itemRequestRepository.findAll(pageable).toList();
+        return itemRequests
+                .stream()
                 .filter(itemRequest -> !itemRequest.getRequestor().getId().equals(userId))
                 .sorted(Comparator.comparing(ItemRequest::getCreated).reversed())
                 .map(ItemRequestMapper::toItemRequestWithAnswersDto)

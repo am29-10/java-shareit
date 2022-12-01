@@ -71,8 +71,8 @@ public class ItemServiceImpl implements ItemService {
             throw new IllegalArgumentException("Параметры поиска введены некоректно");
         }
         Pageable pageable = PageRequest.of(from / size, size);
-        return itemRepository
-                .findAllByOwner(userRepository.findById(id).get(), pageable)
+        List<Item> items = itemRepository.findAllByOwner(userRepository.findById(id).get(), pageable).toList();
+        return items
                 .stream()
                 .map(this::addLastAndNextBooking)
                 .collect(Collectors.toList());
@@ -118,17 +118,17 @@ public class ItemServiceImpl implements ItemService {
             throw new EntityNotFoundException(String.format("Предмет с id = %d отсутствует в списке", id));
         } else {
             Item item = itemRepository.findById(id).get();
+            List<CommentDto> commentsDto;
             if (item.getOwner().equals(userRepository.findById(userId).get())) {
                 return addLastAndNextBooking(item);
             } else {
                 List<Comment> comments = commentRepository.findAllByItem(itemRepository.findById(id).get());
-                List<CommentDto> commentsDto = new ArrayList<>();
-                for (Comment comment : comments) {
-                    CommentDto commentDto = CommentMapper.toCommentDto(comment);
-                    commentsDto.add(commentDto);
-                }
-                return ItemMapper.toItemWishBookingAndCommentDto(item, null, null, commentsDto);
+                commentsDto = comments
+                        .stream()
+                        .map(CommentMapper::toCommentDto)
+                        .collect(Collectors.toList());
             }
+            return ItemMapper.toItemWishBookingAndCommentDto(item, null, null, commentsDto);
         }
     }
 
@@ -152,7 +152,9 @@ public class ItemServiceImpl implements ItemService {
         if (text.isEmpty() && text.isBlank()) {
             return new ArrayList<>();
         } else {
-            return itemRepository.findByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text, text, pageable)
+            List<Item> items = itemRepository.findByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text, text,
+                    pageable).toList();
+            return items
                     .stream()
                     .map(ItemMapper::toItemDto)
                     .collect(Collectors.toList());
@@ -204,11 +206,10 @@ public class ItemServiceImpl implements ItemService {
             itemBookingDto.setNextBooking(BookingMapper.toShortDto(nextBooking));
         }
         List<Comment> comments = commentRepository.findAllByItem(item);
-        List<CommentDto> commentsDto = new ArrayList<>();
-        for (Comment comment : comments) {
-            CommentDto commentDto = CommentMapper.toCommentDto(comment);
-            commentsDto.add(commentDto);
-        }
+        List<CommentDto> commentsDto = comments
+                .stream()
+                .map(CommentMapper::toCommentDto)
+                .collect(Collectors.toList());
         itemBookingDto.setComments(commentsDto);
         return itemBookingDto;
     }
