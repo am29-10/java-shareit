@@ -22,7 +22,6 @@ public class BookingMapper {
                 .build();
     }
 
-
     public static BookingItemDto toShortDto(Booking booking) {
         return new BookingItemDto(
                 booking.getId(),
