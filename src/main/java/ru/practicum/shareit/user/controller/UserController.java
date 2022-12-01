@@ -9,6 +9,8 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -20,9 +22,10 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public List<User> getAll() {
+    public List<User> getAll(@PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                             @Positive @RequestParam(defaultValue = "10") int size) {
         log.info("Получен запрос GET /users");
-        return userService.getAll();
+        return userService.getAll(from, size);
     }
 
     @GetMapping("/{id}")

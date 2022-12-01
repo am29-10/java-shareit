@@ -2,6 +2,7 @@ package ru.practicum.shareit.request.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.EntityNotFoundException;
@@ -36,20 +37,30 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public List<ItemRequestWithAnswersDto> getAllByRequestorId(Long userId) {
+    public List<ItemRequestWithAnswersDto> getAllByRequestorId(Long userId, Integer from, Integer size) {
         if (userRepository.findById(userId).isEmpty()) {
             log.info("Пользователь отсутствует в списке");
             throw new EntityNotFoundException(String.format("Пользователь с id=%d отсутствует в списке", userId));
         }
-        return itemRequestRepository.findAllByRequestor_IdOrderByCreatedDesc(userId)
+        if (from < 0 || size <= 0) {
+            log.info("Параметры поиска введены некоректно");
+            throw new IllegalArgumentException("Параметры поиска введены некоректно");
+        }
+        Pageable pageable = PageRequest.of(from / size, size);
+        return itemRequestRepository.findAllByRequestor_IdOrderByCreatedDesc(userId, pageable)
                 .stream()
                 .map(ItemRequestMapper::toItemRequestWithAnswersDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<ItemRequestWithAnswersDto> getAll(Long userId, Pageable pageable) {
-        return itemRequestRepository.findAll().stream()
+    public List<ItemRequestWithAnswersDto> getAll(Long userId, Integer from, Integer size) {
+        if (from < 0 || size <= 0) {
+            log.info("Параметры поиска введены некоректно");
+            throw new IllegalArgumentException("Параметры поиска введены некоректно");
+        }
+        Pageable pageable = PageRequest.of(from / size, size);
+        return itemRequestRepository.findAll(pageable).stream()
                 .filter(itemRequest -> !itemRequest.getRequestor().getId().equals(userId))
                 .sorted(Comparator.comparing(ItemRequest::getCreated).reversed())
                 .map(ItemRequestMapper::toItemRequestWithAnswersDto)

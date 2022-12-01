@@ -15,4 +15,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     Page<Item> findAllByOwner(User user, Pageable pageable);
 
+    Page<Item> findAll(Pageable pageable);
+
 }
