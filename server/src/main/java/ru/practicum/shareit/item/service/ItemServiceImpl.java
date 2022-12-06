@@ -26,6 +26,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -99,7 +100,9 @@ public class ItemServiceImpl implements ItemService {
             }
             itemsBookingDto.add(itemBookingDto);
         }
-        return itemsBookingDto;
+        return itemsBookingDto.stream()
+                .sorted(Comparator.comparing(ItemBookingDto::getId))
+                .collect(Collectors.toList());
     }
 
     @Override
