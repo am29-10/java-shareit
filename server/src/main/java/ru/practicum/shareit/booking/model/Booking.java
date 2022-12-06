@@ -9,7 +9,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Data
@@ -24,10 +23,8 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-    @NotNull(message = "Дата начала бронирования не может быть пустой")
     @Column(name = "start_date")
     private LocalDateTime start;
-    @NotNull(message = "Дата завершения бронирования не может быть пустой")
     @Column(name = "end_date")
     private LocalDateTime end;
     @ManyToOne
@@ -36,7 +33,6 @@ public class Booking {
     @ManyToOne
     @JoinColumn(name = "booker_id", referencedColumnName = "id")
     private User booker;
-    @NotNull(message = "Статус бронирования не может быть пустым")
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private Status status;

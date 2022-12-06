@@ -5,11 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingItemDto;
-import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.request.model.ItemRequest;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Positive;
+import ru.practicum.shareit.user.model.User;
 
 @Data
 @AllArgsConstructor
@@ -17,11 +14,8 @@ import javax.validation.constraints.Positive;
 @Builder
 public class ItemDto {
 
-    @Positive
     private Long id;
-    @NotBlank(message = "Название предмета не может быть пустым.")
     private String name;
-    @NotBlank(message = "Описание предмета не может быть пустым.")
     private String description;
     private Boolean available;
     private User owner;

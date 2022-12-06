@@ -9,8 +9,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.model.ItemRequest;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,11 +24,8 @@ public class User {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotBlank(message = "Имя пользователя не может быть пустым.")
     @Column(name = "name")
     private String name;
-    @NotBlank(message = "email не может быть пустым.")
-    @Email(message = "указанный email не соответствует правильной структуре 'email'.")
     @Column(name = "email", unique = true)
     private String email;
     @JsonIgnore
