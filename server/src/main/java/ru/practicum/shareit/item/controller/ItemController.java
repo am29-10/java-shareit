@@ -12,9 +12,6 @@ import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -27,27 +24,27 @@ public class ItemController {
 
     @GetMapping
     public List<ItemBookingDto> getAll(@RequestHeader("X-Sharer-User-id") long userId,
-                                       @PositiveOrZero @RequestParam(defaultValue = "0") int from,
-                                       @Positive @RequestParam(defaultValue = "10") int size) {
+                                       @RequestParam(defaultValue = "0") int from,
+                                       @RequestParam(defaultValue = "10") int size) {
         log.info("Получен запрос GET /items");
         return itemService.readAllByUserId(userId, from, size);
     }
 
     @GetMapping("/{id}")
-    public ItemBookingDto getItem(@RequestHeader("X-Sharer-User-id") long userId, @Valid @PathVariable Long id) {
+    public ItemBookingDto getItem(@RequestHeader("X-Sharer-User-id") long userId, @PathVariable Long id) {
         log.info("Получен запрос GET /items/{}", id);
         return itemService.getItemByUserId(id, userId);
     }
 
     @PostMapping
-    public ItemDto create(@RequestHeader("X-Sharer-User-id") long userId, @Valid @RequestBody ItemDto itemDto) {
+    public ItemDto create(@RequestHeader("X-Sharer-User-id") long userId, @RequestBody ItemDto itemDto) {
         log.info("Получен запрос POST /items");
         Item item = ItemMapper.toItem(itemDto);
         return itemService.create(item, userId);
     }
 
     @PatchMapping("/{id}")
-    public Item update(@RequestHeader("X-Sharer-User-id") long userId, @Valid @PathVariable Long id,
+    public Item update(@RequestHeader("X-Sharer-User-id") long userId, @PathVariable Long id,
                        @RequestBody ItemDto itemDto) {
         log.info("Получен запрос PUT /items");
         Item item = ItemMapper.toItem(itemDto);
@@ -55,22 +52,22 @@ public class ItemController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@RequestHeader("X-Sharer-User-id") long userId, @Valid @PathVariable Long id) {
+    public void delete(@RequestHeader("X-Sharer-User-id") long userId, @PathVariable Long id) {
         log.info("Получен запрос DELETE /items");
         itemService.delete(id, userId);
     }
 
     @GetMapping("/search")
     public List<ItemDto> searching(@RequestParam String text,
-                                @PositiveOrZero @RequestParam(defaultValue = "0") int from,
-                                @Positive @RequestParam(defaultValue = "10") int size) {
+                                @RequestParam(defaultValue = "0") int from,
+                                @RequestParam(defaultValue = "10") int size) {
         log.info("Получен запрос GET /search");
         return itemService.findItemsByText(text, from, size);
     }
 
     @PostMapping("/{id}/comment")
-    public CommentDto addComment(@RequestHeader("X-Sharer-User-id") long userId, @Valid @PathVariable Long id,
-                                 @Valid @RequestBody CommentDto commentDto) {
+    public CommentDto addComment(@RequestHeader("X-Sharer-User-id") long userId, @PathVariable Long id,
+                                 @RequestBody CommentDto commentDto) {
         log.info("Получен запрос POST /{}/comment", id);
         Comment comment = CommentMapper.toComment(commentDto);
         return itemService.createComment(id, userId, comment);
