@@ -2,6 +2,8 @@ package ru.practicum.shareit.user.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.EntityNotFoundException;
 import ru.practicum.shareit.user.model.User;
@@ -59,8 +61,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getAll() {
-        return userRepository.findAll();
+    public List<User> getAll(Integer from, Integer size) {
+        if (from < 0 || size <= 0) {
+            log.info("Параметры поиска введены некоректно");
+            throw new IllegalArgumentException("Параметры поиска введены некоректно");
+        }
+        Pageable pageable = PageRequest.of(from / size, size);
+        return userRepository.findAll(pageable).toList();
     }
 
 }
