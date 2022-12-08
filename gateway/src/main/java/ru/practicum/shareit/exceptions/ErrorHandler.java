@@ -20,7 +20,7 @@ public class ErrorHandler {
 
     @ExceptionHandler(ValidationException.class)
     public void handlerBadValidation(HttpServletResponse response) throws IOException {
-        response.sendError(HttpStatus.CONFLICT.value());
+        response.sendError(HttpStatus.BAD_REQUEST.value());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
