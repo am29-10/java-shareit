@@ -10,6 +10,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -26,14 +27,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User update(Long id, User user) {
-        if (userRepository.findById(id).isPresent()) {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isPresent()) {
             if (user.getName() != null) {
-                userRepository.findById(id).get().setName(user.getName());
+                userOpt.get().setName(user.getName());
             }
             if (user.getEmail() != null) {
-                userRepository.findById(id).get().setEmail(user.getEmail());
+                userOpt.get().setEmail(user.getEmail());
             }
-            User updateUser = userRepository.save(userRepository.findById(id).get());
+            User updateUser = userRepository.save(userOpt.get());
             log.info("Пользователь с id '{}' обновлен", updateUser.getId());
             return updateUser;
         } else {
@@ -44,8 +46,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User get(Long userId) {
-        if (userRepository.findById(userId).isPresent()) {
-            return userRepository.findById(userId).get();
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isPresent()) {
+            return user.get();
         } else {
             throw new EntityNotFoundException(String.format("Пользователя с id=%d нет в списке", userId));
         }

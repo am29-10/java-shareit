@@ -25,10 +25,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import javax.validation.ValidationException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -107,21 +104,22 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item update(Long id, Item item, Long userId) {
-        if (itemRepository.findById(id).isPresent()) {
-            if (itemRepository.findById(id).get().getOwner() != userRepository.findById(userId).get()) {
+        Optional<Item> itemOpt = itemRepository.findById(id);
+        if (itemOpt.isPresent()) {
+            if (itemOpt.get().getOwner() != userRepository.findById(userId).get()) {
                 throw new EntityNotFoundException("EntityNotFoundException (Предмет не может быть обновлен, т.к. он " +
                         "не принадлежит данному пользователю)");
             }
             if (item.getName() != null) {
-                itemRepository.findById(id).get().setName(item.getName());
+                itemOpt.get().setName(item.getName());
             }
             if (item.getDescription() != null) {
-                itemRepository.findById(id).get().setDescription(item.getDescription());
+                itemOpt.get().setDescription(item.getDescription());
             }
             if (item.getAvailable() != null) {
-                itemRepository.findById(id).get().setAvailable(item.getAvailable());
+                itemOpt.get().setAvailable(item.getAvailable());
             }
-            Item updateItem = itemRepository.save(itemRepository.findById(id).get());
+            Item updateItem = itemRepository.save(itemOpt.get());
             log.info("Предмет с id = '{}' обновлен", updateItem.getId());
             return updateItem;
         } else {
@@ -132,8 +130,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item getItemById(Long id) {
-        if (itemRepository.findById(id).isPresent()) {
-            return itemRepository.findById(id).get();
+        Optional<Item> item = itemRepository.findById(id);
+        if (item.isPresent()) {
+            return item.get();
         } else {
             throw new EntityNotFoundException(String.format("Предмет с id=%d отсутствует в списке", id));
         }
@@ -141,11 +140,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemBookingDto getItemByUserId(Long itemId, Long userId) {
-        if (itemRepository.findById(itemId).isEmpty()) {
+        Optional<Item> itemOpt = itemRepository.findById(itemId);
+        if (itemOpt.isEmpty()) {
             throw new EntityNotFoundException(String.format("Предмет с id = %d отсутствует в списке", itemId));
         } else {
-            Item item = itemRepository.findById(itemId).get();
-            List<Comment> comments = commentRepository.findAllByItem(itemRepository.findById(itemId).get());
+            Item item = itemOpt.get();
+            List<Comment> comments = commentRepository.findAllByItem(item);
             if (item.getOwner().equals(userRepository.findById(userId).get())) {
                 List<Booking> bookings =
                         bookingRepository.findAllByItem_IdOrderByStartDesc(itemId);
@@ -191,10 +191,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto createComment(Long itemId, Long userId, Comment comment) {
-        if (itemRepository.findById(itemId).isPresent()) {
+        Optional<Item> item = itemRepository.findById(itemId);
+        if (item.isPresent()) {
             if (!bookingRepository.findAllByItemIdAndAndBooker_IdAndEndBefore(itemId, userId, LocalDateTime.now())
                     .isEmpty()) {
-                comment.setItem(itemRepository.findById(itemId).get());
+                comment.setItem(item.get());
                 comment.setAuthor(userRepository.findById(userId).get());
                 comment.setCreated(LocalDateTime.now());
                 return CommentMapper.toCommentDto(commentRepository.save(comment));

@@ -10,11 +10,13 @@ import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.EntityNotFoundException;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -29,13 +31,14 @@ public class BookingServiceImpl implements BookingService {
     public Booking create(Booking booking, Long bookerId) {
         validate(booking);
         booking.setBooker(userRepository.findById(bookerId).get());
-        if (itemRepository.findById(booking.getItem().getId()).isPresent()) {
-            booking.setItem(itemRepository.findById(booking.getItem().getId()).get());
-            if (!itemRepository.findById(booking.getItem().getId()).get().getAvailable()) {
+        Optional<Item> item = itemRepository.findById(booking.getItem().getId());
+        if (item.isPresent()) {
+            booking.setItem(item.get());
+            if (!item.get().getAvailable()) {
                 log.info("IllegalArgumentException (Предмет не является доступным)");
                 throw new IllegalArgumentException("Предмет не является доступным");
             }
-            if (itemRepository.findById(booking.getItem().getId()).get().getOwner().getId().equals(bookerId)) {
+            if (item.get().getOwner().getId().equals(bookerId)) {
                 throw new EntityNotFoundException("Предмет не может быть забронирован у своего обладателя");
             }
             booking.setItem(booking.getItem());
@@ -50,9 +53,10 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking setStatus(Long id, Long userId, boolean approved) {
-        if (bookingRepository.findById(id).isPresent()) {
-            if (bookingRepository.findById(id).get().getItem().getOwner().getId().equals(userId)) {
-                Status status = bookingRepository.findById(id).get().getStatus();
+        Optional<Booking> booking = bookingRepository.findById(id);
+        if (booking.isPresent()) {
+            if (booking.get().getItem().getOwner().getId().equals(userId)) {
+                Status status = booking.get().getStatus();
                 switch (status) {
                     case APPROVED:
                         throw new IllegalArgumentException("Статус уже был принят как 'APPROVED'");
@@ -62,11 +66,11 @@ public class BookingServiceImpl implements BookingService {
                         throw new IllegalArgumentException("Статус уже был принят как 'CANCELED'");
                     case WAITING:
                         if (approved) {
-                            bookingRepository.findById(id).get().setStatus(Status.APPROVED);
+                            booking.get().setStatus(Status.APPROVED);
                         } else {
-                            bookingRepository.findById(id).get().setStatus(Status.REJECTED);
+                            booking.get().setStatus(Status.REJECTED);
                         }
-                        return bookingRepository.save(bookingRepository.findById(id).get());
+                        return bookingRepository.save(booking.get());
                     default:
                         throw new IllegalArgumentException("Unknown status: " + status);
                 }
@@ -81,10 +85,11 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking get(Long id, Long userId) {
-        if (bookingRepository.findById(id).isPresent()) {
-            if (bookingRepository.findById(id).get().getBooker().getId().equals(userId) ||
-                    bookingRepository.findById(id).get().getItem().getOwner().getId().equals(userId)) {
-                return bookingRepository.findById(id).get();
+        Optional<Booking> booking = bookingRepository.findById(id);
+        if (booking.isPresent()) {
+            if (booking.get().getBooker().getId().equals(userId) ||
+                    booking.get().getItem().getOwner().getId().equals(userId)) {
+                return booking.get();
             } else {
                 throw new EntityNotFoundException(String.format("Невозможно выдать данные о брони, т.к. " +
                         "пользователь с id = %d не является арендатором или владельцем предмета с id = %d", userId, id));

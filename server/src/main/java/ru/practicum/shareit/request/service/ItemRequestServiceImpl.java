@@ -15,6 +15,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -73,16 +74,17 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public ItemRequestWithAnswersDto getById(Long userId, Long id) {
+        Optional<ItemRequest> itemRequest = itemRequestRepository.findById(id);
         if (userRepository.findById(userId).isEmpty()) {
             log.info("EntityNotFoundException (Несуществующий пользователь)");
             throw new EntityNotFoundException("Несуществующий пользователь");
         }
-        if (itemRequestRepository.findById(id).isEmpty()) {
+        if (itemRequest.isEmpty()) {
             log.info("EntityNotFoundException (Несуществующий запрос)");
             throw new EntityNotFoundException("Несуществующий запрос");
         }
         return ItemRequestMapper
-                .toItemRequestWithAnswersDto(itemRequestRepository.findById(id).get());
+                .toItemRequestWithAnswersDto(itemRequest.get());
     }
 
     private void validate(ItemRequest itemRequest, Long userId) {
