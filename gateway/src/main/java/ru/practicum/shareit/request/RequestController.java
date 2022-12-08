@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.RequestDto;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 @Controller
 @RequestMapping(path = "/requests")
@@ -28,16 +30,16 @@ public class RequestController {
 
     @GetMapping
     public ResponseEntity<Object> getAllByRequestorId(@RequestHeader("X-Sharer-User-id") long userId,
-                                                               @RequestParam(defaultValue = "0") int from,
-                                                               @RequestParam(defaultValue = "10") int size) {
+                                                               @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                                               @Positive @RequestParam(defaultValue = "10") int size) {
         log.info("Получен запрос GET /requests");
         return requestClient.getRequestsByRequestor(userId, from, size);
     }
 
     @GetMapping("/all")
     public ResponseEntity<Object> getAll(@RequestHeader("X-Sharer-User-id") long userId,
-                                         @RequestParam(defaultValue = "0") int from,
-                                         @RequestParam(defaultValue = "10") int size) {
+                                         @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                         @Positive @RequestParam(defaultValue = "10") int size) {
         log.info("Получен запрос GET /requests/all");
         return requestClient.getRequests(userId, from, size);
     }
