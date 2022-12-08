@@ -70,7 +70,7 @@ class UserServiceTest {
         assertEquals(user1.getName(), user.getName());
 
         verify(userRepository, times(1)).save(any());
-        verify(userRepository, times(4)).findById(anyLong());
+        verify(userRepository, times(1)).findById(anyLong());
     }
 
     @Test
@@ -93,7 +93,7 @@ class UserServiceTest {
 
         assertEquals(user1, user);
 
-        verify(userRepository, times(2)).findById(anyLong());
+        verify(userRepository, times(1)).findById(anyLong());
     }
 
     @Test

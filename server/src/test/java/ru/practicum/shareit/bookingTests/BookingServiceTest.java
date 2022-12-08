@@ -116,7 +116,7 @@ class BookingServiceTest {
         assertEquals(booking1.getBooker(), user);
 
         verify(userRepository, times(1)).findById(any());
-        verify(itemRepository, times(4)).findById(any());
+        verify(itemRepository, times(1)).findById(any());
         verify(bookingRepository, times(1)).save(any());
 
     }
@@ -149,7 +149,7 @@ class BookingServiceTest {
         assertThrows(IllegalArgumentException.class, () -> bookingService.create(booking, user2.getId()));
 
         verify(userRepository, times(1)).findById(any());
-        verify(itemRepository, times(3)).findById(any());
+        verify(itemRepository, times(1)).findById(any());
     }
 
     @Test
@@ -164,7 +164,7 @@ class BookingServiceTest {
         assertThrows(EntityNotFoundException.class, () -> bookingService.create(booking, user.getId()));
 
         verify(userRepository, times(1)).findById(any());
-        verify(itemRepository, times(4)).findById(any());
+        verify(itemRepository, times(1)).findById(any());
     }
 
     @Test
@@ -179,7 +179,7 @@ class BookingServiceTest {
 
         assertEquals(booking.getStatus(), Status.APPROVED);
 
-        verify(bookingRepository, times(5)).findById(any());
+        verify(bookingRepository, times(1)).findById(any());
         verify(bookingRepository, times(1)).save(any());
     }
 
@@ -195,7 +195,7 @@ class BookingServiceTest {
 
         assertEquals(booking.getStatus(), Status.REJECTED);
 
-        verify(bookingRepository, times(5)).findById(any());
+        verify(bookingRepository, times(1)).findById(any());
         verify(bookingRepository, times(1)).save(any());
     }
 
@@ -208,7 +208,7 @@ class BookingServiceTest {
         assertThrows(EntityNotFoundException.class, () -> bookingService.setStatus(booking.getId(), user3.getId(),
                 true));
 
-        verify(bookingRepository, times(2)).findById(any());
+        verify(bookingRepository, times(1)).findById(any());
     }
 
     @Test
@@ -233,7 +233,7 @@ class BookingServiceTest {
         assertThrows(IllegalArgumentException.class, () -> bookingService.setStatus(booking.getId(), user.getId(),
                 true));
 
-        verify(bookingRepository, times(3)).findById(any());
+        verify(bookingRepository, times(1)).findById(any());
     }
 
     @Test
@@ -246,7 +246,7 @@ class BookingServiceTest {
         assertThrows(IllegalArgumentException.class, () -> bookingService.setStatus(booking.getId(), user.getId(),
                 true));
 
-        verify(bookingRepository, times(3)).findById(any());
+        verify(bookingRepository, times(1)).findById(any());
     }
 
     @Test
@@ -259,7 +259,7 @@ class BookingServiceTest {
         assertThrows(IllegalArgumentException.class, () -> bookingService.setStatus(booking.getId(), user.getId(),
                 true));
 
-        verify(bookingRepository, times(3)).findById(any());
+        verify(bookingRepository, times(1)).findById(any());
     }
 
     @Test
@@ -272,7 +272,7 @@ class BookingServiceTest {
         assertThrows(IllegalArgumentException.class, () -> bookingService.setStatus(booking.getId(), user.getId(),
                 true));
 
-        verify(bookingRepository, times(3)).findById(any());
+        verify(bookingRepository, times(1)).findById(any());
     }
 
     @Test
@@ -284,7 +284,7 @@ class BookingServiceTest {
 
         assertEquals(booking1, booking);
 
-        verify(bookingRepository, times(4)).findById(any());
+        verify(bookingRepository, times(1)).findById(any());
     }
 
     @Test
@@ -306,7 +306,7 @@ class BookingServiceTest {
 
         assertThrows(EntityNotFoundException.class, () -> bookingService.get(booking.getId(), user3.getId()));
 
-        verify(bookingRepository, times(3)).findById(any());
+        verify(bookingRepository, times(1)).findById(any());
     }
 
     @Test

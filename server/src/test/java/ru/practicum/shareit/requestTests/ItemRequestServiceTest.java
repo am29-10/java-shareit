@@ -169,7 +169,7 @@ class ItemRequestServiceTest {
         assertEquals(request1.getId(), request.getId());
 
         verify(userRepository, times(1)).findById(anyLong());
-        verify(requestRepository, times(2)).findById(anyLong());
+        verify(requestRepository, times(1)).findById(anyLong());
     }
 
     @Test

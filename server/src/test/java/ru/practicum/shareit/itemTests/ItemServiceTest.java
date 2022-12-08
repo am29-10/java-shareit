@@ -194,7 +194,7 @@ class ItemServiceTest {
         assertEquals(item.getOwner().getId(), user.getId());
         assertEquals(item.getAvailable(), item.getAvailable());
 
-        verify(itemRepository, times(6)).findById(anyLong());
+        verify(itemRepository, times(1)).findById(anyLong());
         verify(userRepository, times(1)).findById(anyLong());
         verify(itemRepository, times(1)).save(any());
     }
@@ -221,7 +221,7 @@ class ItemServiceTest {
 
         assertThrows(EntityNotFoundException.class, () -> itemService.update(1L, itemUpdate, user2.getId()));
 
-        verify(itemRepository, times(2)).findById(anyLong());
+        verify(itemRepository, times(1)).findById(anyLong());
         verify(userRepository, times(1)).findById(anyLong());
     }
 
@@ -235,7 +235,7 @@ class ItemServiceTest {
 
         assertEquals(item.getName(), "item");
 
-        verify(itemRepository, times(2)).findById(anyLong());
+        verify(itemRepository, times(1)).findById(anyLong());
     }
 
     @Test
@@ -253,7 +253,7 @@ class ItemServiceTest {
 
         assertEquals(item.getName(), "item");
 
-        verify(itemRepository, times(3)).findById(anyLong());
+        verify(itemRepository, times(1)).findById(anyLong());
         verify(userRepository, times(1)).findById(anyLong());
         verify(commentRepository, times(1)).findAllByItem(any());
     }
@@ -290,7 +290,7 @@ class ItemServiceTest {
 
         assertNotNull(item.getComments());
 
-        verify(itemRepository, times(3)).findById(anyLong());
+        verify(itemRepository, times(1)).findById(anyLong());
         verify(userRepository, times(1)).findById(anyLong());
         verify(commentRepository, times(1)).findAllByItem(any());
     }
@@ -353,7 +353,7 @@ class ItemServiceTest {
 
         assertEquals(createComment.getText(), "text");
 
-        verify(itemRepository, times(2)).findById(anyLong());
+        verify(itemRepository, times(1)).findById(anyLong());
         verify(bookingRepository, times(1)).findAllByItemIdAndAndBooker_IdAndEndBefore(anyLong(),
                 anyLong(), any());
         verify(userRepository, times(1)).findById(anyLong());
