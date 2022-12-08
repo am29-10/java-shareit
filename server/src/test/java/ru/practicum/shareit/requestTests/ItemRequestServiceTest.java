@@ -122,7 +122,7 @@ class ItemRequestServiceTest {
 
         assertEquals(request1, request);
 
-        verify(userRepository, times(2)).findById(anyLong());
+        verify(userRepository, times(1)).findById(anyLong());
         verify(requestRepository, times(1)).save(any());
     }
 
@@ -209,24 +209,5 @@ class ItemRequestServiceTest {
         assertEquals(requests.size(), 1);
 
         verify(requestRepository, times(1)).findAll((Pageable) any());
-    }
-
-    @Test
-    void validateUser() {
-        Mockito
-                .when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.empty());
-
-        assertThrows(EntityNotFoundException.class, () -> requestService.create(request, user.getId()));
-
-        verify(userRepository, times(1)).findById(anyLong());
-    }
-
-    @Test
-    void validateRequest() {
-        request.setDescription("");
-
-        assertThrows(EntityNotFoundException.class, () -> requestService.create(request, user.getId()));
-
     }
 }

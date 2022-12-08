@@ -390,12 +390,6 @@ class BookingServiceTest {
     }
 
     @Test
-    void findAllByRenterIdFailNegativeFrom() {
-        assertThrows(IllegalArgumentException.class, () -> bookingService.findAllByRenterId(user.getId(), State.WAITING,
-                -1, 10));
-    }
-
-    @Test
     void findAllByOwnerId() {
         Mockito
                 .when(userRepository.findById(anyLong()))
@@ -474,20 +468,6 @@ class BookingServiceTest {
                 0, 10));
 
         verify(userRepository, times(1)).findById(any());
-    }
-
-    @Test
-    void findAllByOwnerIdFailWithNegativeFrom() {
-        assertThrows(IllegalArgumentException.class, () -> bookingService.findAllByOwnerId(user.getId(), State.WAITING,
-                -1, 10));
-
-    }
-
-    @Test
-    void validateStart() {
-        booking.setStart(LocalDateTime.of(2020, 1, 1, 1, 1, 1, 1));
-
-        assertThrows(IllegalArgumentException.class, () -> bookingService.create(booking, user.getId()));
     }
 
     @Test

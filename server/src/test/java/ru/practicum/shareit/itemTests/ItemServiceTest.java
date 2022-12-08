@@ -26,7 +26,6 @@ import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -149,11 +148,6 @@ class ItemServiceTest {
     }
 
     @Test
-    void readAllFail() {
-        assertThrows(IllegalArgumentException.class, () -> itemService.readAll(-1, 10));
-    }
-
-    @Test
     void readAllByUserId() {
         List<Item> items = List.of(item);
         Mockito
@@ -168,11 +162,6 @@ class ItemServiceTest {
 
         verify(itemRepository, times(1)).findAllByOwner(any(), any());
         verify(userRepository, times(1)).findById(anyLong());
-    }
-
-    @Test
-    void readAllByUserIdFail() {
-        assertThrows(IllegalArgumentException.class, () -> itemService.readAllByUserId(1L, -1, 10));
     }
 
     @Test
@@ -322,11 +311,6 @@ class ItemServiceTest {
     }
 
     @Test
-    void findItemsByTextFail() {
-        assertThrows(IllegalArgumentException.class, () -> itemService.findItemsByText("Text", -1, 10));
-    }
-
-    @Test
     void findItemsByTextIsEmpty() {
         String text = "";
         List<ItemDto> items = itemService.findItemsByText(text, 1, 10);
@@ -400,40 +384,6 @@ class ItemServiceTest {
         verify(itemRepository, times(1)).findById(anyLong());
         verify(bookingRepository, times(1)).findAllByItemIdAndAndBooker_IdAndEndBefore(anyLong(),
                 anyLong(), any());
-    }
-
-    @Test
-    void validateName() {
-        Item itemFail = Item.builder()
-                .name("")
-                .description("")
-                .owner(user)
-                .build();
-
-        assertThrows(ValidationException.class, () -> itemService.create(itemFail, 1L));
-    }
-
-    @Test
-    void validateDescription() {
-        Item itemFail = Item.builder()
-                .name("name")
-                .description("")
-                .owner(user)
-                .build();
-
-        assertThrows(ValidationException.class, () -> itemService.create(itemFail, 1L));
-    }
-
-    @Test
-    void validateAvailable() {
-        Item itemFail = Item.builder()
-                .name("name")
-                .description("description")
-                .available(null)
-                .owner(user)
-                .build();
-
-        assertThrows(IllegalArgumentException.class, () -> itemService.create(itemFail, 1L));
     }
 
     @Test
