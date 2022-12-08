@@ -65,10 +65,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAll(Integer from, Integer size) {
-        if (from < 0 || size <= 0) {
-            log.info("Параметры поиска введены некоректно");
-            throw new IllegalArgumentException("Параметры поиска введены некоректно");
-        }
         Pageable pageable = PageRequest.of(from / size, size);
         return userRepository.findAll(pageable).toList();
     }

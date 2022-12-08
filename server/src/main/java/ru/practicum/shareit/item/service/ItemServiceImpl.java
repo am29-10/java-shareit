@@ -23,7 +23,6 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,7 +40,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto create(Item item, Long userId) {
-        validate(item);
         item.setOwner(userRepository.findById(userId).get());
         if (item.getItemRequest() != null) {
             item.setItemRequest(itemRequestRepository.findById(item.getItemRequest().getId()).get());
@@ -57,20 +55,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<Item> readAll(Integer from, Integer size) {
-        if (from < 0 || size <= 0) {
-            log.info("Параметры поиска введены некоректно");
-            throw new IllegalArgumentException("Параметры поиска введены некоректно");
-        }
         Pageable pageable = PageRequest.of(from / size, size);
         return itemRepository.findAll(pageable).toList();
     }
 
     @Override
     public List<ItemBookingDto> readAllByUserId(Long id, Integer from, Integer size) {
-        if (from < 0 || size <= 0) {
-            log.info("Параметры поиска введены некоректно");
-            throw new IllegalArgumentException("Параметры поиска введены некоректно");
-        }
         Pageable pageable = PageRequest.of(from / size, size);
 
         Map<Item, List<Comment>> comments =
@@ -162,7 +152,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void delete(Long id, Long userId) {
-        validate(getItemById(id));
+        //validate(getItemById(id));
         if (itemRepository.findById(id).isPresent()) {
             itemRepository.deleteById(id);
         } else {
@@ -172,10 +162,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> findItemsByText(String text, Integer from, Integer size) {
-        if (from < 0 || size <= 0) {
-            log.info("Параметры поиска введены некоректно");
-            throw new IllegalArgumentException("Параметры поиска введены некоректно");
-        }
         Pageable pageable = PageRequest.of(from / size, size);
         if (text.isEmpty() && text.isBlank()) {
             return new ArrayList<>();
@@ -205,21 +191,6 @@ public class ItemServiceImpl implements ItemService {
             }
         } else {
             throw new EntityNotFoundException(String.format("Предмет с id=%d отсутствует в списке", itemId));
-        }
-    }
-
-    private void validate(Item item) {
-        if (item.getName().isEmpty()) {
-            log.info("ValidationException (Пустое название)");
-            throw new ValidationException("Пустое название");
-        }
-        if (item.getDescription().isEmpty()) {
-            log.info("ValidationException (Пустое описание)");
-            throw new ValidationException("Пустое описание");
-        }
-        if (item.getAvailable() == null) {
-            log.info("ValidationException (Ошибка статуса предмета с id = {})", item.getId());
-            throw new IllegalArgumentException("Ошибка статуса предмет");
         }
     }
 

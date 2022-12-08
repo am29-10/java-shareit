@@ -29,7 +29,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public ItemRequest create(ItemRequest itemRequest, Long userId) {
-        validate(itemRequest, userId);
         itemRequest.setCreated(LocalDateTime.now());
         itemRequest.setRequestor(userRepository.findById(userId).get());
         ItemRequest itemRequestCreated = itemRequestRepository.save(itemRequest);
@@ -43,10 +42,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             log.info("Пользователь отсутствует в списке");
             throw new EntityNotFoundException(String.format("Пользователь с id=%d отсутствует в списке", userId));
         }
-        if (from < 0 || size <= 0) {
-            log.info("Параметры поиска введены некоректно");
-            throw new IllegalArgumentException("Параметры поиска введены некоректно");
-        }
         Pageable pageable = PageRequest.of(from / size, size);
         List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequestor_IdOrderByCreatedDesc(userId,
                 pageable).toList();
@@ -58,10 +53,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public List<ItemRequestWithAnswersDto> getAll(Long userId, Integer from, Integer size) {
-        if (from < 0 || size <= 0) {
-            log.info("Параметры поиска введены некоректно");
-            throw new IllegalArgumentException("Параметры поиска введены некоректно");
-        }
         Pageable pageable = PageRequest.of(from / size, size);
         List<ItemRequest> itemRequests = itemRequestRepository.findAll(pageable).toList();
         return itemRequests
@@ -85,16 +76,5 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         }
         return ItemRequestMapper
                 .toItemRequestWithAnswersDto(itemRequest.get());
-    }
-
-    private void validate(ItemRequest itemRequest, Long userId) {
-        if (userRepository.findById(userId).isEmpty()) {
-            log.info("EntityNotFoundException (Несуществующий пользователь)");
-            throw new EntityNotFoundException("Несуществующий пользователь");
-        }
-        if (itemRequest.getDescription() == null || itemRequest.getDescription().isBlank()) {
-            log.info("IllegalArgumentException (Пустое описание)");
-            throw new IllegalArgumentException("Пустое описание");
-        }
     }
 }

@@ -29,7 +29,10 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking create(Booking booking, Long bookerId) {
-        validate(booking);
+        if (booking.getEnd().isBefore(booking.getStart())) {
+            log.info("ValidationException (Нельзя завершить бронь раньше ее регистрации)");
+            throw new IllegalArgumentException("Завершение брони раньше ее регистрации");
+        }
         booking.setBooker(userRepository.findById(bookerId).get());
         Optional<Item> item = itemRepository.findById(booking.getItem().getId());
         if (item.isPresent()) {
@@ -101,10 +104,6 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<Booking> findAllByRenterId(Long renterId, State state, Integer from, Integer size) {
-        if (from < 0 || size <= 0) {
-            log.info("Параметры поиска введены некоректно");
-            throw new IllegalArgumentException("Параметры поиска введены некоректно");
-        }
         Pageable pageable = PageRequest.of(from / size, size);
         if (userRepository.findById(renterId).isPresent()) {
             LocalDateTime now = LocalDateTime.now();
@@ -139,10 +138,6 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<Booking> findAllByOwnerId(Long ownerId, State state, Integer from, Integer size) {
-        if (from < 0 || size <= 0) {
-            log.info("Параметры поиска введены некоректно");
-            throw new IllegalArgumentException("Параметры поиска введены некоректно");
-        }
         Pageable pageable = PageRequest.of(from / size, size);
         if (userRepository.findById(ownerId).isPresent()) {
             LocalDateTime now = LocalDateTime.now();
@@ -172,17 +167,6 @@ public class BookingServiceImpl implements BookingService {
                     "в списке)", ownerId);
             throw new EntityNotFoundException(String.format("Невозможно найти бронь у пользователя с id = %d, т.к. " +
                     "он отсутствует в списке", ownerId));
-        }
-    }
-
-    private void validate(Booking booking) {
-        if (booking.getStart().isBefore(LocalDateTime.now())) {
-            log.info("ValidationException (Нельзя забронировать вещь в прошедшем времени)");
-            throw new IllegalArgumentException("Бронь в прошедшем времени");
-        }
-        if (booking.getEnd().isBefore(booking.getStart())) {
-            log.info("ValidationException (Нельзя завершить бронь раньше ее регистрации)");
-            throw new IllegalArgumentException("Завершение брони раньше ее регистрации");
         }
     }
 }
