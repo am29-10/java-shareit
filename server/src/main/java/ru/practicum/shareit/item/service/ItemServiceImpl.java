@@ -152,7 +152,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void delete(Long id, Long userId) {
-        //validate(getItemById(id));
         if (itemRepository.findById(id).isPresent()) {
             itemRepository.deleteById(id);
         } else {
